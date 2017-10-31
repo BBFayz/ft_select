@@ -6,7 +6,7 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/29 01:21:45 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/31 09:16:40 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 09:45:21 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ void		loop_display(t_list *list, t_shell *shell)
 	int		mem;
 	t_node	*loop;
 
+	tputs(tgetstr("cl", NULL), 1, ft_putshit);
 	b = 0;
 	mem = 0;
 	loop = list->first;

@@ -6,7 +6,7 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 00:09:57 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/31 09:17:03 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 09:45:04 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,20 +62,18 @@ static void	react(t_list *list, t_shell *shell, int n, char *buf)
 	}
 }
 
-void		main_loop(t_list *list, t_shell *shell)
+static void	main_loop(t_list *list, t_shell *shell)
 {
 	int		n;
 	char	buf[3];
 
 	while (1)
 	{
-		tputs(tgetstr("cl", NULL), 1, ft_putshit);
 		while (check_good_size(list, shell) == -1)
 			;
 		loop_display(list, shell);
 		if ((n = read(0, &buf, 3)) > 0)
-			if ((react(list, shell, n, buf)) == 1)
-				return ;
+			react(list, shell, n, buf);
 	}
 }
 
