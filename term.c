@@ -6,13 +6,13 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 03:47:00 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/28 07:31:04 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 09:13:40 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_select.h"
 
-t_shell	*initialize_shell()
+static t_shell	*initialize_shell(void)
 {
 	t_shell	*shell;
 
@@ -23,24 +23,53 @@ t_shell	*initialize_shell()
 	if (!(shell->now = malloc(sizeof(*shell->now))))
 		exit(1);
 	if (tcgetattr(0, shell->old) == -1)
-		     exit(-1);
+		exit(-1);
 	if (tcgetattr(0, shell->now) == -1)
-		     exit(-1);
+		exit(-1);
 	shell->now->c_lflag &= ~(ICANON);
 	shell->now->c_lflag &= ~(ECHO);
 	shell->now->c_cc[VMIN] = 0;
-	shell->now->c_cc[VTIME] = 200;
+	shell->now->c_cc[VTIME] = 1;
 	tcsetattr(0, TCSADRAIN, shell->now);
 	tputs(tgetstr("vi", NULL), 1, ft_putshit);
 	tputs(tgetstr("ti", NULL), 1, ft_putshit);
 	return (shell);
 }
 
-t_shell	*storeterm()
+t_shell			*termanip(void)
 {
 	static	t_shell *shell = NULL;
 
 	if (shell == NULL)
 		shell = initialize_shell();
+	else
+	{
+		tcsetattr(0, TCSADRAIN, shell->old);
+		tputs(tgetstr("ve", NULL), 1, ft_putshit);
+		tputs(tgetstr("te", NULL), 1, ft_putshit);
+		free(shell->old);
+		shell->old = NULL;
+		free(shell->now);
+		shell->now = NULL;
+		free(shell);
+		shell = NULL;
+	}
 	return (shell);
+}
+
+void			handle_stop(int sig)
+{
+	if (!isatty(1))
+		return ;
+	if (sig == SIGTSTP)
+	{
+		termanip();
+		signal(SIGTSTP, SIG_DFL);
+		ioctl(0, TIOCSTI, "\032");
+	}
+	else if (sig == SIGCONT)
+	{
+		signal(SIGTSTP, handle_stop);
+		termanip();
+	}
 }

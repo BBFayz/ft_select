@@ -6,50 +6,80 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 00:09:57 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/28 07:55:43 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 09:17:03 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_select.h"
 
-void		display(t_list *list)
+static int	check_good_size(t_list *list, t_shell *shell)
 {
-	t_node	*loop;
+	struct winsize	w;
+	int				x;
+	int				y;
 
-	loop = list->first;
-	while (loop != NULL)
+	ioctl(0, TIOCGWINSZ, &w);
+	x = w.ws_col;
+	y = w.ws_row;
+	if (x >= list->max_length &&
+			(x / (list->max_length + (x / list->max_length - 1))) * y >=
+			list->nb_elem)
 	{
-		if (loop->chosen == 1)
-			tputs(tgetstr("mr", NULL), 1, ft_putshit);
-		if (loop == list->current)
-			tputs(tgetstr("us", NULL), 1, ft_putshit);
-		ft_putstr(loop->name);
-		if (loop->chosen == 1)
-			tputs(tgetstr("me", NULL), 1, ft_putshit);
-		if (loop == list->current)
-			tputs(tgetstr("ue", NULL), 1, ft_putshit);
-		loop = loop->next;
-		write(1, " ", 1);
+		shell->size_x = x;
+		shell->size_y = y;
+		return (1);
+	}
+	else
+		return (-1);
+}
+
+static void	react(t_list *list, t_shell *shell, int n, char *buf)
+{
+	if (n == 3)
+	{
+		if (buf[2] == 67)
+			list->current = list->current->next;
+		else if (buf[2] == 68)
+			list->current = get_previous_node(list->current);
+		else if (buf[2] == 65)
+			list->current = get_up_node(list, shell);
+		else if (buf[2] == 66)
+			list->current = get_down_node(list, shell);
+	}
+	else if (n == 1)
+	{
+		if (buf[0] == 32)
+		{
+			list->current->chosen = (list->current->chosen == 0 ? 1 : 0);
+			list->current = list->current->next;
+		}
+		else if (buf[0] == 127 || buf[0] == 126)
+			del_node(list);
+		else if (buf[0] == 27)
+			del_all(list);
+		else if (buf[0] == 10)
+			end_display(list);
 	}
 }
 
-void	go_loop_this(t_list *list, t_shell *shell)
+void		main_loop(t_list *list, t_shell *shell)
 {
-	char c;
+	int		n;
+	char	buf[3];
 
-	c = '0';
-
-	while (c != 'q')
+	while (1)
 	{
 		tputs(tgetstr("cl", NULL), 1, ft_putshit);
 		while (check_good_size(list, shell) == -1)
 			;
-		display(list);
-		read(0, &c, 1);
+		loop_display(list, shell);
+		if ((n = read(0, &buf, 3)) > 0)
+			if ((react(list, shell, n, buf)) == 1)
+				return ;
 	}
 }
 
-int		main(int argc, char **argv)
+int			main(int argc, char **argv)
 {
 	char	*name_term;
 	t_list	*list;
@@ -63,12 +93,16 @@ int		main(int argc, char **argv)
 	if (tgetent(NULL, name_term) == ERR)
 		return (-1);
 	if (argc < 2)
-		return (0);
-	list = start(argv);
-	shell = storeterm();
-	go_loop_this(list, shell);
-	tcsetattr(0, TCSADRAIN, shell->old);
-	tputs(tgetstr("ve", NULL), 1, ft_putshit);
-	tputs(tgetstr("te", NULL), 1, ft_putshit);
+	{
+		write(2, "Try with more arguments\n", 24);
+		return (-1);
+	}
+	signal(SIGTSTP, handle_stop);
+	signal(SIGCONT, handle_stop);
+	list = parsing(argv);
+	shell = termanip();
+	main_loop(list, shell);
+	termanip();
+	end_display(list);
 	return (0);
 }

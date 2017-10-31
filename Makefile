@@ -6,12 +6,12 @@
 #    By: azybert <azybert@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2017/10/28 02:39:21 by azybert           #+#    #+#              #
-#    Updated: 2017/10/28 08:15:08 by azybert          ###   ########.fr        #
+#    Updated: 2017/10/31 04:47:08 by azybert          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = ft_select
-FILES = ft_select.c list.c term.c manage.c
+FILES = ft_select.c parsing.c term.c display.c manage_list.c
 OBJ = $(FILES:.c=.o)
 TERMLIB = -ltermcap
 LIBFT = libft/libft.a
