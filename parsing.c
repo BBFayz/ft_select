@@ -6,7 +6,7 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 00:55:37 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/31 11:44:24 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 13:58:32 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,5 +48,7 @@ t_list			*parsing(char **argv)
 				list->max_length : node->length);
 	}
 	node->next = list->first;
+	if (list->max_length == 0)
+		exit(1);
 	return (list);
 }

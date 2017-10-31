@@ -6,7 +6,7 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 03:47:00 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/31 12:00:05 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 13:54:48 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ static t_shell	*initialize_shell(void)
 	shell->now->c_lflag &= ~(ECHO);
 	shell->now->c_cc[VMIN] = 0;
 	shell->now->c_cc[VTIME] = 1;
-	tcsetattr(0, TCSADRAIN, shell->now);
+	if (tcsetattr(0, TCSADRAIN, shell->now) == -1)
+		exit(1);
 	tputs(tgetstr("vi", NULL), 1, ft_putshit);
 	tputs(tgetstr("ti", NULL), 1, ft_putshit);
 	return (shell);
@@ -44,7 +45,8 @@ t_shell			*termanip(void)
 		shell = initialize_shell();
 	else
 	{
-		tcsetattr(0, TCSADRAIN, shell->old);
+		if (tcsetattr(0, TCSADRAIN, shell->old) == -1)
+			exit(1);
 		tputs(tgetstr("ve", NULL), 1, ft_putshit);
 		tputs(tgetstr("te", NULL), 1, ft_putshit);
 		free(shell->old);
@@ -62,8 +64,8 @@ void			handle_stop(int sig)
 	if (sig == SIGTSTP)
 	{
 		termanip();
+		signal(SIGTERM, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
-		signal(SIGKILL, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTSTP, SIG_DFL);
 		signal(SIGCONT, handle_stop);
@@ -71,8 +73,8 @@ void			handle_stop(int sig)
 	}
 	else if (sig == SIGCONT)
 	{
+		signal(SIGTERM, handle_stop);
 		signal(SIGINT, handle_stop);
-		signal(SIGKILL, handle_stop);
 		signal(SIGQUIT, handle_stop);
 		signal(SIGTSTP, handle_stop);
 		termanip();

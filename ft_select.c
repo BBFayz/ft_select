@@ -6,7 +6,7 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 00:09:57 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/31 12:04:02 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 13:53:51 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,8 +79,8 @@ static void	main_loop(t_list *list, t_shell *shell)
 
 static void	ft_signal(void)
 {
+	signal(SIGTERM, handle_stop);
 	signal(SIGINT, handle_stop);
-	signal(SIGKILL, handle_stop);
 	signal(SIGQUIT, handle_stop);
 	signal(SIGTSTP, handle_stop);
 }
