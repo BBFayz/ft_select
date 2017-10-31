@@ -6,7 +6,7 @@
 /*   By: azybert <azybert@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/28 03:47:00 by azybert           #+#    #+#             */
-/*   Updated: 2017/10/31 09:13:40 by azybert          ###   ########.fr       */
+/*   Updated: 2017/10/31 12:00:05 by azybert          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,17 +59,27 @@ t_shell			*termanip(void)
 
 void			handle_stop(int sig)
 {
-	if (!isatty(1))
-		return ;
 	if (sig == SIGTSTP)
 	{
 		termanip();
+		signal(SIGINT, SIG_DFL);
+		signal(SIGKILL, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTSTP, SIG_DFL);
+		signal(SIGCONT, handle_stop);
 		ioctl(0, TIOCSTI, "\032");
 	}
 	else if (sig == SIGCONT)
 	{
+		signal(SIGINT, handle_stop);
+		signal(SIGKILL, handle_stop);
+		signal(SIGQUIT, handle_stop);
 		signal(SIGTSTP, handle_stop);
 		termanip();
+	}
+	else
+	{
+		termanip();
+		exit(1);
 	}
 }
